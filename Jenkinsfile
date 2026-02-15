@@ -9,7 +9,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'git@github.com:Vignesh-R-0106/your-repo.git'
+                git branch: 'main',
+                    url: 'https://github.com/Vignesh-R-0106/playwright-bdd-framework-practice.git'
             }
         }
 
@@ -28,11 +29,7 @@ pipeline {
 
     post {
         always {
-            allure([
-                includeProperties: false,
-                jdk: '',
-                results: [[path: 'allure-results']]
-            ])
+            allure results: [[path: 'allure-results']]
         }
     }
 }
