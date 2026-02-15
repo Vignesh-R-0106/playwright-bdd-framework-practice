@@ -5,54 +5,59 @@ import {
   After,
   setDefaultTimeout,
 } from "@cucumber/cucumber";
-import { chromium, Browser, BrowserContext, Page } from "@playwright/test";
+import { chromium, Browser } from "@playwright/test";
+import { CustomWorld } from "../support/world";
+import fs from "fs";
+import path from "path";
 
-// Set this to a very high value globally
-setDefaultTimeout(60000);
+setDefaultTimeout(60 * 1000);
 
 let browser: Browser;
 
-BeforeAll({ timeout: 60000 }, async function () {
-  // Launching with extra arguments to bypass Windows permission checks
+BeforeAll(async function () {
   browser = await chromium.launch({
-    headless: false,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    headless: process.env.CI ? true : false,
   });
+
+  console.log("🚀 Browser Launched");
 });
 
-Before({ name: "Setup", timeout: 60000 }, async function () {
-  // Check if browser exists before creating context
+Before(async function (this: CustomWorld) {
   if (!browser) {
-    throw new Error("Browser was not launched in BeforeAll!");
+    throw new Error("Browser not initialized");
   }
 
-  this.context = await browser.newContext();
+  this.context = await browser.newContext({
+    recordVideo: {
+      dir: "videos/",
+    },
+  });
 
-  // Start tracing BEFORE opening the page
+  this.page = await this.context.newPage();
+
   await this.context.tracing.start({
     screenshots: true,
     snapshots: true,
     sources: true,
   });
 
-  this.page = await this.context.newPage();
-  console.log("✅ Page opened and Tracing started");
-
-  // Direct assignment without the complexity of tracing first
-  this.context = await browser.newContext();
-  this.page = await this.context.newPage();
-
-  console.log("✅ Page opened successfully");
+  console.log("✅ Scenario Started");
 });
 
-After({ name: "Teardown and Trace Capture" }, async function () {
-  if (this.context) {
-    await this.context.close();
+After(async function (this: CustomWorld, scenario) {
+  if (scenario.result?.status === "FAILED") {
+    if (this.page) {
+      const screenshot = await this.page.screenshot();
+      await this.attach(screenshot, "image/png");
+    }
   }
+
+  await this.context.close();
 });
 
 AfterAll(async function () {
   if (browser) {
     await browser.close();
+    console.log("🛑 Browser Closed");
   }
 });
