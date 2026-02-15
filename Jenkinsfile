@@ -24,6 +24,12 @@ pipeline {
             }
         }
 
+        stage('Install Playwright Browsers') {
+            steps {
+                bat 'npx playwright install'
+            }
+        }
+
         stage('Run Tests') {
             steps {
                 bat 'npm test'
@@ -40,7 +46,7 @@ pipeline {
     post {
         always {
             publishHTML(target: [
-                allowMissing: false,
+                allowMissing: true,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
                 reportDir: 'allure-report',
