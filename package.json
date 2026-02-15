@@ -1,0 +1,22 @@
+{
+  "name": "orangehrm",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "cucumber-js --retry 2 --format allure-cucumberjs/reporter --format-options \"{\\\"resultsDir\\\":\\\"allure-results\\\"}\"",
+    "report:generate": "allure generate allure-results --clean -o allure-report",
+    "report:open": "allure open allure-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@cucumber/cucumber": "^12.6.0",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.2.3",
+    "allure-cucumberjs": "^3.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
