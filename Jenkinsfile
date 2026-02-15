@@ -5,6 +5,10 @@ pipeline {
         nodejs 'Node18'
     }
 
+    environment {
+        CI = 'true'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -25,15 +29,21 @@ pipeline {
                 bat 'npm test'
             }
         }
+
+        stage('Generate Allure Report') {
+            steps {
+                bat 'npx allure generate allure-results --clean -o allure-report'
+            }
+        }
     }
 
     post {
         always {
-            script {
-                allure([
-                    results: [[path: 'allure-results']]
-                ])
-            }
+            publishHTML([
+                reportDir: 'allure-report',
+                reportFiles: 'index.html',
+                reportName: 'Allure Report'
+            ])
         }
     }
 }
